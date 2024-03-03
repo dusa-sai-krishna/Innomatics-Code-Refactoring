@@ -1,20 +1,41 @@
-from flask import Flask, render_template, request
+
+from flask import Flask, redirect, render_template, request, url_for, session
+from requests import get
+import collections
 
 app = Flask(__name__)
+app.secret_key="key"
 
-notes = []
+data=collections.defaultdict(list)
+
 @app.route('/')
-def load_home():
+def load_login():
+    return render_template('login.html')
+
+@app.route('/home',methods=['POST','GET'])
+def authentication():
+    if request.method!='POST':
+        return redirect(url_for("load_login"))
+    username=request.form.get("username")
+    if username not in data.keys():
+        session['username']=username
+    notes=data[session.get('username')]
     return render_template('home.html',notes=notes,count=len(notes))
 
-@app.route('/addnote',methods=['POST'])
+
+
+@app.route('/addnote',methods=['POST','GET'])
 def add_note():
+    if request.method!='POST':
+        return redirect(url_for("load_login"))
     note = request.form.get("note")
+    notes=data[session.get('username')]
     count=len(notes)
     print(notes,note,count)
     if (count==0 and note not in [None,'']) or (count>0 and notes[-1]!=note and note not in [None,'']):
         notes.append(note)
         count+=1
+    data[session.get('username')]=notes
     return render_template('home.html',notes=notes,count=len(notes))
 
 

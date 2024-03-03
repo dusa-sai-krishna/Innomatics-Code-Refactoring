@@ -1,0 +1,1 @@
+This is a note taking app created with flask. The speciality of this app is session management. There is no data leak in the app.
